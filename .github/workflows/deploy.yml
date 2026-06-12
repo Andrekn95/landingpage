@@ -10,24 +10,30 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python 3.11
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
     - name: Install dependencies
       run: pip install -r requirements.txt
-    
 
-    - name: Ejecutar la app
-      run: python app.py
-    
-    
+    - name: 🚀 Validar encendido de la app (Modo Background)
+      run: |
+        python app.py &
+        PID=$!
+        echo "Esperando 5 segundos para verificar que la app inicie correctamente..."
+        sleep 5
+        echo "Verificando si el proceso sigue vivo..."
+        kill -0 $PID
+        echo "✅ La app encendió con éxito. Apagando proceso de prueba..."
+        kill $PID
+
     - name: Costruir imagen de docker
       run: docker build -t ghcr.io/byronmoreno/landing:1.0.0 .
     
@@ -36,3 +42,24 @@ jobs:
     
     - name: Publicar la imagen creada
       run: docker push ghcr.io/byronmoreno/landing:1.0.0
+
+    - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
+      run: |
+        echo "Probando conexión SSH con:"
+        echo "Host: ${{ secrets.GHCR_PATH}}"
+        echo "Usuario: ${{ secrets.GHC_PASSWORD }}"
+        echo "Puerto: ${{ secrets.GHC_PORTUPS}}"
+        echo "Password: ${{ secrets.GHC_USER }}"
+      
+    - name: 🧪 Probar conexión SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.GHCR_PATH}}
+        username: ${{ secrets.GHC_USER }}
+        password: ${{ secrets.GHC_PASSWORD }}
+        port: ${{ secrets.GHC_PORTUPS }}
+        script: |
+          echo "✅ Conexión exitosa desde GitHub Actions"
+          hostname
+          whoami
+          uptime
