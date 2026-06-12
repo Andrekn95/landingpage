@@ -34,14 +34,16 @@ jobs:
         echo "✅ La app encendió con éxito. Apagando proceso de prueba..."
         kill $PID
 
+    # ⚠️ CAMBIA 'byronmoreno' POR TU USUARIO DE GITHUB AQUÍ:
     - name: Costruir imagen de docker
-      run: docker build -t ghcr.io/byronmoreno/landing:1.0.0 .
+      run: docker build -t ghcr.io/Andrekn95/landing:1.0.0 .
     
     - name: Login en GitHub Container Registry
       run: echo "${{ secrets.GHCR_PATH }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     
+    # ⚠️ CAMBIA 'byronmoreno' POR TU USUARIO DE GITHUB AQUÍ TAMBIÉN:
     - name: Publicar la imagen creada
-      run: docker push ghcr.io/byronmoreno/landing:1.0.0
+      run: docker push ghcr.io/Andrekn95/landing:1.0.0
 
     - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
       run: |
