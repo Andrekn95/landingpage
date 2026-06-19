@@ -37,13 +37,12 @@ jobs:
     - name: Construir imagen de docker
       run: docker build -t ghcr.io/andrekn95/landing:1.0.0 .
     
-    - name: Login en GitHub Container Registry
+    - name: Login en GitHub Container Registry (Local Runner)
       run: echo "${{ secrets.GHCR_PATH }}" | docker login ghcr.io -u andrekn95 --password-stdin
     
     - name: Publicar la imagen creada
       run: docker push ghcr.io/andrekn95/landing:1.0.0
 
-    # 📂 CAMBIO 1: Reemplazar el SSH de prueba por SCP para copiar stack.yml y Makefile
     - name: 📁 Copiar archivos al servidor (SCP)
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -54,7 +53,6 @@ jobs:
         source: "stack.yml,Makefile"
         target: "/home/${{ secrets.GHC_USER }}/landingC"
 
-    # 🚀 CAMBIO 2: Ejecutar los comandos de Docker Swarm en el VPS
     - name: 🛸 Desplegando servidor
       uses: appleboy/ssh-action@v1
       with:
@@ -66,8 +64,11 @@ jobs:
           echo "Desplegando los servicios..."
           cd /home/${{ secrets.GHC_USER }}/landingC/
           
-          # Descargar la versión más reciente que acabamos de compilar
+          # Autenticar el servidor VPS en ghcr.io para evitar el error de "unauthorized"
+          echo "${{ secrets.GHCR_PATH }}" | docker login ghcr.io -u andrekn95 --password-stdin
+          
+          # Descargar la versión más reciente de la imagen en el VPS
           docker pull ghcr.io/andrekn95/landing:1.0.0
           
-          # Desplegar usando Docker Swarm
-          docker stack deploy -c stack.yml juanito
+          # Desplegar el stack en Docker Swarm creando el servicio 'andres'
+          docker stack deploy -c stack.yml andres
