@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  andres:
+    image: ghcr.io/andrekn95/landing:1.0.0
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.andres.entrypoints=http"
+        - "traefik.http.routers.andres.rule=Host(`andres.byronrm.com`)"
+        - "traefik.http.middlewares.andres-https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.andres.middlewares=andres-https-redirect"
+        - "traefik.http.routers.andres-secure.entrypoints=https"
+        - "traefik.http.routers.andres-secure.rule=Host(`andres.byronrm.com`)"
+        - "traefik.http.routers.andres-secure.tls=true"
+        - "traefik.http.routers.andres-secure.tls.certresolver=http"
+        - "traefik.http.routers.andres-secure.service=andres"
+        - "traefik.http.services.andres.loadbalancer.server.port=5000"
+        - "traefik.docker.network=traefik-public"
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
