@@ -43,13 +43,19 @@ jobs:
     - name: Publicar la imagen creada
       run: docker push ghcr.io/andrekn95/landing:1.0.0
 
-    - name: 🧾 Mostrar variables básicas (solo locales, no secretos)
-      run: |
-        echo "Probando conexión SSH con:"
-        echo "Usuario: ${{ secrets.GHC_USER }}"
-        echo "Puerto: ${{ secrets.GHC_PORTUPS }}"
-      
-    - name: 🧪 Probar conexión SSH3
+    # 📂 CAMBIO 1: Reemplazar el SSH de prueba por SCP para copiar stack.yml y Makefile
+    - name: 📁 Copiar archivos al servidor (SCP)
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.GHC_USER }}
+        password: ${{ secrets.GHC_PASSWORD }}
+        port: ${{ secrets.GHC_PORTUPS }}
+        source: "stack.yml,Makefile"
+        target: "/home/${{ secrets.GHC_USER }}/landingC"
+
+    # 🚀 CAMBIO 2: Ejecutar los comandos de Docker Swarm en el VPS
+    - name: 🛸 Desplegando servidor
       uses: appleboy/ssh-action@v1
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -57,8 +63,11 @@ jobs:
         password: ${{ secrets.GHC_PASSWORD }}
         port: ${{ secrets.GHC_PORTUPS }}
         script: |
-          echo "✅ Conexión exitosa desde GitHub Actions"
-          touch ejemploc.txt
-          hostname
-          whoami
-          uptime
+          echo "Desplegando los servicios..."
+          cd /home/${{ secrets.GHC_USER }}/landingC/
+          
+          # Descargar la versión más reciente que acabamos de compilar
+          docker pull ghcr.io/andrekn95/landing:1.0.0
+          
+          # Desplegar usando Docker Swarm
+          docker stack deploy -c stack.yml juanito
