@@ -37,9 +37,8 @@ jobs:
     - name: Construir imagen de docker
       run: docker build -t ghcr.io/andrekn95/landing:1.0.0 .
     
-    # 🛠️ CORREGIDO AQUÍ: Ahora Docker sí usará tu clave secreta (GHCR_PATH) para autenticarse con permisos de escritura
     - name: Login en GitHub Container Registry
-      run: echo "${{ secrets.GHCR_PATH }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      run: echo "${{ secrets.GHCR_PATH }}" | docker login ghcr.io -u andrekn95 --password-stdin
     
     - name: Publicar la imagen creada
       run: docker push ghcr.io/andrekn95/landing:1.0.0
@@ -50,14 +49,13 @@ jobs:
         echo "Usuario: ${{ secrets.GHC_USER }}"
         echo "Puerto: ${{ secrets.GHC_PORTUPS }}"
       
-    # 🛠️ AJUSTADO AQUÍ: Conexión SSH usando tus credenciales reales de la captura
-    - name: 🧪 Probar conexión SSH4
+    - name: 🧪 Probar conexión SSH3
       uses: appleboy/ssh-action@v1
       with:
-        host: ${{ secrets.VPS_HOST }}       # Tu IP/Host guardado en VPS_HOST
-        username: ${{ secrets.GHC_USER }}    # Tu usuario de la captura
-        password: ${{ secrets.GHC_PASSWORD }}# Tu contraseña de la captura
-        port: ${{ secrets.GHC_PORTUPS }}    # Tu puerto de la captura
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.GHC_USER }}
+        password: ${{ secrets.GHC_PASSWORD }}
+        port: ${{ secrets.GHC_PORTUPS }}
         script: |
           echo "✅ Conexión exitosa desde GitHub Actions"
           touch ejemploc.txt
