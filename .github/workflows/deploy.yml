@@ -51,7 +51,7 @@ jobs:
         echo "Puerto: ${{ secrets.GHC_PORTUPS }}"
       
     # 🛠️ AJUSTADO AQUÍ: Conexión SSH usando tus credenciales reales de la captura
-    - name: 🧪 Probar conexión SSH2
+    - name: 🧪 Probar conexión SSH3
       uses: appleboy/ssh-action@v1
       with:
         host: ${{ secrets.VPS_HOST }}       # Tu IP/Host guardado en VPS_HOST
